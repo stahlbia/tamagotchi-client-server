@@ -1,32 +1,34 @@
-import java.time.Duration;
+//Trabalho de GA - Redes de Computadores: Aplicação e Transporte - Prof. Márcio Garcia
+//Ana Beatriz Stahl, Emanuele Schlemmer, Gabriela Bley, Kelly Natasha Fernandes
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.Random;
+
 
 public class Tamagotchi {
     private String nome;
     private int idade;
     private boolean vivo;
 
-    // ATUALIZAR ESTADOS E NIVEIS INICIAIS
+    // ATUALIZAR ESTADOS E NIVEIS INICIAIS (TODOS EM 100%)
     private String estado;
-    private double fome = 100; // Nivel de fome (100%)
-    private double saude = 100; // Nivel de saude (100%)
-    private double energia = 100; // Nivel de energia (100%)
-    private double felicidade = 100; // Nivel de felicidade (100%)
-
+    private double fome = 100;
+    private double saude = 100;
+    private double energia = 100;
+    private double felicidade = 100;
+    private ScheduledExecutorService scheduler;
 
     // CONSTRUTOR
-    public Tamagotchi(String nome, int idade, double peso) {
+    public Tamagotchi(String nome, int idade,boolean vivo) {
         this.nome = nome;
         this.idade = idade;
-        this.peso = peso;
-        this.vivo = true; // O Tamagochi começa vivo
+        this.vivo = vivo;
+        iniciarScheduler();
     }
 
-
     // GETTERS E SETTERS
-    // Nome
     public String getNome() {
         return nome;
     }
@@ -34,15 +36,9 @@ public class Tamagotchi {
         this.nome = nome;
     }
 
-    // Idade
-    public int getIdade() {
-        return idade;
-    }
-    public void setIdade(int idade) {1
-        this.idade = idade;
-    }
+    public int getIdade() { return idade; }
+    public void setIdade(int idade) { this.idade = idade; }
 
-    // Vivo
     public boolean isVivo() {
         return vivo;
     }
@@ -50,15 +46,6 @@ public class Tamagotchi {
         this.vivo = vivo;
     }
 
-    // Estado
-    public String getEstado() {
-        return estado;
-    }
-    public void setEstado(String estado) {
-        this.estado = estado;
-    }
-
-    // Fome
     public double getFome() {
         return fome;
     }
@@ -66,7 +53,6 @@ public class Tamagotchi {
         this.fome = fome;
     }
 
-    // Saude
     public double getSaude() {
         return saude;
     }
@@ -74,7 +60,6 @@ public class Tamagotchi {
         this.saude = saude;
     }
 
-    // Energia
     public double getEnergia() {
         return energia;
     }
@@ -82,7 +67,6 @@ public class Tamagotchi {
         this.energia = energia;
     }
 
-    // Felicidade
     public double getFelicidade() {
         return felicidade;
     }
@@ -90,13 +74,32 @@ public class Tamagotchi {
         this.felicidade = felicidade;
     }
 
+    private void iniciarScheduler() {
+        scheduler = Executors.newScheduledThreadPool(1);
+        scheduler.scheduleAtFixedRate(() -> {
+            if (vivo) {
+                atualizarNecessidades();
+            } else {
+                scheduler.shutdown();
+            }
+        }, 0, 10, TimeUnit.SECONDS); // Atualiza a cada 10 segundos. Dá p mudar!
+    }
+
+    private void atualizarNecessidades(){
+        Random random = new Random();
+        atualizaFome(random.nextInt(5)+1);
+        atualizaEnergia(random.nextInt(5)+1);
+        atualizaFelicidade(random.nextInt(5)+1);
+        atualizaSaude(random.nextInt(5)+1);
+        System.out.println("ATUALIZAÇÃO DE STATUS: ");
+        imprimeInfo();
+    }
 
     // INFORMACOES DO TAMAGOTCHI
     public void imprimeInfo (){
         System.out.println("\n---------------------------------------------------------------------------------------");
-        System.out.println("INFORMACOES " + getNome() + ":");
-        System.out.println("Idade: " +this.idade);
-        System.out.println("\n STATUS " + getNome() + ":");
+        System.out.println("INFORMAÇÕES DE " + getNome() + ":");
+        System.out.println("Idade: " + getIdade() + " anos");
         System.out.println("Fome: " + getFome() + "%");
         System.out.println("Saúde: " + getSaude() + "%");
         System.out.println("Energia: " + getEnergia() + "%");
@@ -106,8 +109,7 @@ public class Tamagotchi {
 
     // ATUALIZA FOME COM O TEMPO
     public void atualizaFome(double quantidade) {
-        fome = getFome();
-        setFome(Math.max(0, fome - quantidade)); // Evita que a fome fique abaixo de 0
+        setFome(Math.max(0, getFome() - quantidade)); // Evita que a fome fique abaixo de 0
         if (getFome() < 50 && getFome() > 0) {
             System.out.println(nome + " está com fome e precisa comer!");
         } else if (getFome() == 0) {
@@ -117,8 +119,7 @@ public class Tamagotchi {
 
     // ATUALIZA ENERGIA COM TEMPO
     public void atualizaEnergia(double quantidade) {
-        energia = getEnergia();
-        setEnergia(Math.max(0, energia - quantidade)); // Evita que a energia fique abaixo de 0
+        setEnergia(Math.max(0, getEnergia() - quantidade)); // Evita que a energia fique abaixo de 0
         if (getEnergia() < 50 && getEnergia() > 0) {
             System.out.println(getNome() + " está exausto e precisa descansar!");
         } else if (getEnergia() == 0) {
@@ -128,8 +129,7 @@ public class Tamagotchi {
 
     // ATUALIZA SAUDE COM TEMPO
     public void atualizaSaude(double quantidade) {
-        saude = getSaude();
-        setSaude(Math.max(0, saude - quantidade)); // Evita que a saude fique abaixo de 0
+        setSaude(Math.max(0, getSaude() - quantidade)); // Evita que a saude fique abaixo de 0
         if (getSaude() <= 30) {
             System.out.println(getNome() + " está doente e precisa de remédios!");
         } else if (getSaude() == 0) {
@@ -139,8 +139,7 @@ public class Tamagotchi {
 
     // ATUALIZA FELICIDADE COM TEMPO
     public void atualizaFelicidade(double quantidade) {
-        saude = getFelicidade();
-        setFelicidade(Math.max(0, felicidade - quantidade)); // Evita que a saude fique abaixo de 0
+        setFelicidade(Math.max(0, getFelicidade() - quantidade)); // Evita que a saude fique abaixo de 0
         if (getFelicidade() <= 30) {
             System.out.println(getNome() + " está triste e precisa brincar!");
         }
@@ -148,9 +147,9 @@ public class Tamagotchi {
 
     // VERIFICA ESTADO DO PET
     public void verificarEstado() {
-        if (fome == 0 || energia == 0 || saude == 0) {
+        if (getFome() == 0 || getEnergia() == 0 || getSaude() == 0) {
             setVivo(false);
-            System.out.println(nome + " infelizmente não resistiu e morreu...");
+            System.out.println(nome + " infelizmente não resistiu e morreu. Ficou com fome, sem energia e sem saúde!");
         }
     }
 }

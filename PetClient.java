@@ -1,4 +1,5 @@
-
+//Trabalho de GA - Redes de Computadores: Aplicação e Transporte - Prof. Márcio Garcia
+//Ana Beatriz Stahl, Emanuele Schlemmer, Gabriela Bley, Kelly Natasha Fernandes
 import java.io.*;
 import java.net.*;
 
@@ -21,16 +22,28 @@ public class PetClient {
                 }
             }).start();
 
+            System.out.println("Digite um dos comandos disponíveis:\n");
+            System.out.println("alimentar");
+            System.out.println("brincar");
+            System.out.println("energia");
+            System.out.println("verificar");
+
             String userMessage;
-            while ((userMessage = userInput.readLine()) != null) {
-                out.println(userMessage);
-            }
+           while ((userMessage = userInput.readLine()) != null) {
+               switch (userMessage.toLowerCase()) {
+                   case "alimentar":
+                   case "brincar":
+                   case "verificar energia":
+                   case "verificar":
+                       out.println(userMessage);
+                       break;
+                   default:
+                       System.out.println("Comando não reconhecido. Tente novamente:");
+                       System.out.println("Comandos válidos: alimentar, brincar, energia e verificar");
+               }
+           }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-
-
     }
 }
