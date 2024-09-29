@@ -1,10 +1,10 @@
 //Trabalho de GA - Redes de Computadores: Aplicação e Transporte - Prof. Márcio Garcia
 //Ana Beatriz Stahl, Emanuele Schlemmer, Gabriela Bley, Kelly Natasha Fernandes
 
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.Random;
 
 
 public class Tamagotchi {
@@ -73,6 +73,7 @@ public class Tamagotchi {
     public void setFelicidade(double felicidade) {
         this.felicidade = felicidade;
     }
+
 
     private void iniciarScheduler() {
         scheduler = Executors.newScheduledThreadPool(1);
@@ -152,5 +153,48 @@ public class Tamagotchi {
             System.out.println(nome + " infelizmente não resistiu e morreu. Ficou com fome, sem energia e sem saúde!");
         }
     }
+
+   // ALIMENTAR
+    public void alimentar() {
+        if (fome < 100) { 
+        fome = 100;
+            System.out.println(nome + " foi alimentado e agora está com a fome em 100%!");
+        } else {
+            System.out.println(nome + " já está satisfeito e não precisa comer agora.");
+        }
+    }
+
+    // DAR REMÉDIO
+    public void darRemedio() {
+        if (saude < 100) { 
+            saude = 100;
+            System.out.println(nome + " tomou o remédio e está com a saúde em 100%!");
+        } else {
+            System.out.println(nome + " já está saudável e não precisa de remédio.");
+    }
 }
+
+    // DORMIR
+    public void recuperaEnergia() {
+        if (energia < 100) { 
+            energia = 100;
+            System.out.println(nome + " dormiu e está com a energia restaurada em 100%!");
+        } else {
+            System.out.println(nome + " já está descansado e não precisa dormir.");
+    }
+}
+
+    // BRINCAR
+    public void brincar() {
+        if (felicidade < 100) { 
+            felicidade = 100;
+            System.out.println(nome + " brincou e está com a felicidade em 100%!");
+        } else {
+            System.out.println(nome + " já está muito feliz e não precisa brincar agora.");
+    }
+}
+
+   
+}
+
 
