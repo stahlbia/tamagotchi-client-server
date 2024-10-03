@@ -1,5 +1,5 @@
 //Trabalho de GA - Redes de Computadores: Aplicação e Transporte - Prof. Márcio Garcia
-//Ana Beatriz Stahl, Emanuele Schlemmer, Gabriela Bley, Kelly Natasha Fernandes
+//Ana Beatriz Stahl, Emanuele Schlemmer, Gabriela Bley, Kelly Natasha Fernandes e Luisa Becker
 import java.io.*;
 import java.net.*;
 
