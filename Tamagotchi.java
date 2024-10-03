@@ -13,7 +13,6 @@ public class Tamagotchi {
     private boolean vivo;
 
     // ATUALIZAR ESTADOS E NIVEIS INICIAIS (TODOS EM 100%)
-    private String estado;
     private double fome = 100;
     private double saude = 100;
     private double energia = 100;
@@ -74,7 +73,6 @@ public class Tamagotchi {
         this.felicidade = felicidade;
     }
 
-
     private void iniciarScheduler() {
         scheduler = Executors.newScheduledThreadPool(1);
         scheduler.scheduleAtFixedRate(() -> {
@@ -98,14 +96,8 @@ public class Tamagotchi {
 
     // INFORMACOES DO TAMAGOTCHI
     public void imprimeInfo (){
-        System.out.println("\n---------------------------------------------------------------------------------------");
-        System.out.println("INFORMAÇÕES DE " + getNome() + ":");
-        System.out.println("Idade: " + getIdade() + " anos");
-        System.out.println("Fome: " + getFome() + "%");
-        System.out.println("Saúde: " + getSaude() + "%");
-        System.out.println("Energia: " + getEnergia() + "%");
-        System.out.println("Diversao: " + getFelicidade() + "%");
-        System.out.println("---------------------------------------------------------------------------------------\n");
+        String info = "%s: < %d dias, %.1f%% fome, %.1f%% saude, %.1f%% energia, %.1f%% diversao >\n";
+        System.out.printf(info, getNome(), getIdade(), getFome(), getSaude(), getEnergia(), getFelicidade());
     }
 
     // ATUALIZA FOME COM O TEMPO
@@ -171,8 +163,8 @@ public class Tamagotchi {
             System.out.println(nome + " tomou o remédio e está com a saúde em 100%!");
         } else {
             System.out.println(nome + " já está saudável e não precisa de remédio.");
+        }
     }
-}
 
     // DORMIR
     public void recuperaEnergia() {
@@ -181,8 +173,8 @@ public class Tamagotchi {
             System.out.println(nome + " dormiu e está com a energia restaurada em 100%!");
         } else {
             System.out.println(nome + " já está descansado e não precisa dormir.");
+        }
     }
-}
 
     // BRINCAR
     public void brincar() {
@@ -191,10 +183,6 @@ public class Tamagotchi {
             System.out.println(nome + " brincou e está com a felicidade em 100%!");
         } else {
             System.out.println(nome + " já está muito feliz e não precisa brincar agora.");
+        }
     }
 }
-
-   
-}
-
-

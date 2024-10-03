@@ -11,6 +11,7 @@ public class PetClient {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
 
+            // Thread para receber mensagens do servidor
             new Thread(() -> {
                 try {
                     String serverMessage;
@@ -22,26 +23,23 @@ public class PetClient {
                 }
             }).start();
 
-            System.out.println("Digite um dos comandos disponíveis:\n");
-            System.out.println("alimentar");
-            System.out.println("brincar");
-            System.out.println("energia");
-            System.out.println("verificar");
+            // Solicitar o nome do Tamagotchi ao usuário
+            System.out.println("Digite o nome do seu Tamagotchi:");
+            String nomeTamagotchi = userInput.readLine();
+            out.println(nomeTamagotchi);
+
+            // Menu de comandos disponíveis
+            System.out.println("Comandos disponíveis:");
+            System.out.println("selecionado <índice> - Seleciona um Tamagotchi pelo índice");
+            System.out.println("alimentar - Alimenta o Tamagotchi selecionado");
+            System.out.println("brincar - Brinca com o Tamagotchi selecionado");
+            System.out.println("energia - Verifica a energia do Tamagotchi selecionado");
+            System.out.println("verificar - Verifica o status do Tamagotchi selecionado");
 
             String userMessage;
-           while ((userMessage = userInput.readLine()) != null) {
-               switch (userMessage.toLowerCase()) {
-                   case "alimentar":
-                   case "brincar":
-                   case "verificar energia":
-                   case "verificar":
-                       out.println(userMessage);
-                       break;
-                   default:
-                       System.out.println("Comando não reconhecido. Tente novamente:");
-                       System.out.println("Comandos válidos: alimentar, brincar, energia e verificar");
-               }
-           }
+            while ((userMessage = userInput.readLine()) != null) {
+                out.println(userMessage);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
