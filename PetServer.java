@@ -5,23 +5,19 @@ import java.net.*;
 import java.util.*;
 
 public class PetServer {
-    private static List<ClientHandler> clients = new ArrayList<>();
-    private static List<Tamagotchi> tamagotchis = new ArrayList<>();
+    private static final List<ClientHandler> clients = new ArrayList<>();
+    private static final List<Tamagotchi> tamagotchis = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(12345);
-        System.out.println("Servidor iniciado...");
-
-        while (true) {
-            try {
-            Socket socket = serverSocket.accept();
-            System.out.println("Novo cliente conectado!");
-            ClientHandler clientHandler = new ClientHandler(socket);
-            clients.add(clientHandler);
-            new Thread(clientHandler).start();
-        }
-            catch(IOException e){
-                System.err.println("Erro ao aceitar a coneção: " + e.getMessage());
+        try (ServerSocket serverSocket = new ServerSocket(12345)) {
+            System.out.println(i18n.SERVER_STARTED);
+            while (true) try {
+                Socket socket = serverSocket.accept();
+                ClientHandler clientHandler = new ClientHandler(socket);
+                clients.add(clientHandler);
+                new Thread(clientHandler).start();
+            } catch (IOException e) {
+                System.err.printf((i18n.ERROR_CONNECT_SERVER) + "%n", e.getMessage());
             }
         }
     }
@@ -32,19 +28,18 @@ public class PetServer {
         }
     }
 
-    public static String listarTamagotchis() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < tamagotchis.size(); i++) {
-            sb.append(i).append(": ").append(tamagotchis.get(i).getNome()).append("\n");
+    public static String listTamagotchis() {
+        List<String> infos = new ArrayList<>();
+        for (Tamagotchi t: tamagotchis) {
+            infos.add(t.getInfo());
         }
-        return sb.toString();
+        return String.join("\n", infos);
     }
 
     static class ClientHandler implements Runnable {
-        private Socket socket;
+        private final Socket socket;
         private PrintWriter out;
-        private BufferedReader in;
-        private Tamagotchi tamagotchiSelecionado;
+        private Tamagotchi tamagotchiSelected;
 
         public ClientHandler(Socket socket) {
             this.socket = socket;
@@ -53,64 +48,77 @@ public class PetServer {
         @Override
         public void run() {
             try {
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 out = new PrintWriter(socket.getOutputStream(), true);
 
-                // Receber o nome do Tamagotchi do cliente
-                String nome = in.readLine();
-                Tamagotchi tamagotchi = new Tamagotchi(nome, 0, true);
+                // Receives client name
+                String clientName = in.readLine();
+                System.out.printf((i18n.SERVER_CLIENT_CONNECTED) + "%n", clientName);
+
+                // Receives tamagotchi's name
+                String tamagotchiName = in.readLine();
+                Tamagotchi tamagotchi = new Tamagotchi(tamagotchiName, 0, true);
                 tamagotchis.add(tamagotchi);
 
                 String message;
                 while ((message = in.readLine()) != null) {
-                    System.out.println("Recebido: " + message);
-                    if (message.startsWith("interagir")) {
-                        sendMessage(listarTamagotchis());
-                    } else if (message.startsWith("selecionado")) {
-                        tamagotchiSelecionado = getTamagotchiSelecionado(message);
-                        if (tamagotchiSelecionado != null) {
-
-                            out.println("Tamagotchi selecionado: " + tamagotchiSelecionado.getNome());
-                            out.println("Comandos disponíveis: alimentar, brincar, energia, verificar");
+                    System.out.printf((i18n.SERVER_RECEIVE_MESSAGE) + "%n", clientName, message);
+                    if (message.startsWith(i18n.COMMAND_LIST)) {
+                        sendMessage(listTamagotchis());
+                    } else if (message.startsWith(i18n.COMMAND_SELECT)) {
+                        tamagotchiSelected = getSelectedTamagotchi(message);
+                        if (tamagotchiSelected != null) {
+                            out.println(String.format(i18n.TAMAGOTCHI_SELECTED, tamagotchiSelected.getName()));
+                            out.println(tamagotchiSelected.getInfo());
+                            out.println(i18n.getAvailableCommands());
                         }
-                    } else if (tamagotchiSelecionado != null) {
+                    } else if (tamagotchiSelected != null) {
                         switch (message.toLowerCase()) {
                             case "alimentar":
-                                if (tamagotchiSelecionado.isVivo()) {
-                                    tamagotchiSelecionado.alimentar(); //AQUI É NECESSÁRIO CRIAR O MÉTODO DE ALIMENTAÇÃO
-                                    broadcast("O Tamagotchi foi alimentado.");
+                                if (tamagotchiSelected.isAlive()) {
+                                    tamagotchiSelected.feed();
+                                    broadcast(String.format(i18n.TAMAGOTCHI_FED_UP, tamagotchiSelected.getName()));
                                 } else
-                                    sendMessage("O Tamagotchi está morto.");
+                                    sendMessage(String.format(i18n.TAMAGOTCHI_DEAD, tamagotchiSelected.getName()));
                                 break;
                             case "brincar":
-                                if (tamagotchiSelecionado.isVivo()) {
-                                    tamagotchiSelecionado.brincar(); //AQUI É NECESSÁRIO CRIAR O MÉTODO DE BRINCAR
-                                    broadcast("O Tamagotchi brincou e está feliz.");
+                                if (tamagotchiSelected.isAlive()) {
+                                    tamagotchiSelected.play();
+                                    broadcast(String.format(i18n.TAMAGOTCHI_PLAYED, tamagotchiSelected.getName()));
                                 } else
-                                    sendMessage("O Tamagotchi está morto.");
+                                    sendMessage(String.format(i18n.TAMAGOTCHI_DEAD, tamagotchiSelected.getName()));
                                 break;
-                            case "energia":
-                                if (tamagotchiSelecionado.isVivo())
-                                    tamagotchiSelecionado.recuperaEnergia(); //AQUI É NECESSÁRIO CRIAR O MÉTODO DE AUMENTAR ENERGIA (DORMIR)
-                                else
-                                    sendMessage("O Tamagotchi está morto.");
+                            case "dormir":
+                                if (tamagotchiSelected.isAlive()) {
+                                    tamagotchiSelected.sleep();
+                                    broadcast(String.format(i18n.TAMAGOTCHI_SLEPT, tamagotchiSelected.getName()));
+                                } else
+                                    sendMessage(String.format(i18n.TAMAGOTCHI_DEAD, tamagotchiSelected.getName()));
+                                break;
+                            case "remedio":
+                                if (tamagotchiSelected.isAlive()) {
+                                    tamagotchiSelected.medicate();
+                                    broadcast(String.format(i18n.TAMAGOTCHI_MEDICATED, tamagotchiSelected.getName()));
+                                } else {
+                                    sendMessage(String.format(i18n.TAMAGOTCHI_DEAD, tamagotchiSelected.getName()));
+                                }
                                 break;
                             case "verificar":
-                                if (tamagotchiSelecionado.isVivo())
-                                    tamagotchiSelecionado.imprimeInfo();
+                                if (tamagotchiSelected.isAlive())
+                                    broadcast(tamagotchiSelected.getInfo());
                                 else
-                                    sendMessage("O Tamagotchi está morto.");
+                                    sendMessage(String.format(i18n.TAMAGOTCHI_DEAD, tamagotchiSelected.getName()));
                                 break;
                             default:
-                                sendMessage("Comando não reconhecido.");
+                                sendMessage(i18n.ERROR_INVALID_COMMAND);
                                 break;
                         }
                     } else {
-                        out.println("Selecione um Tamagotchi primeiro");
+                        out.println(i18n.TAMAGOTCHI_NOT_SELECTED);
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.err.printf((i18n.ERROR_COMMUNICATE_SERVER) + "%n", e.getMessage());
             }
         }
 
@@ -118,17 +126,17 @@ public class PetServer {
             out.println(message);
         }
 
-        private Tamagotchi getTamagotchiSelecionado(String input) {
+        private Tamagotchi getSelectedTamagotchi(String input) {
             String[] parts = input.split(" ");
             if (parts.length == 2) {
                 int index = Integer.parseInt(parts[1]);
                 if (index >= 0 && index < tamagotchis.size()) {
                     return tamagotchis.get(index);
                 } else {
-                    out.println("Indice inválido.");
+                    out.println(i18n.ERROR_INVALID_INDEX);
                 }
             } else {
-                out.println("Comando invalido.");
+                out.println(i18n.ERROR_INVALID_COMMAND);
             }
             return null;
         }

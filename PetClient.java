@@ -16,32 +16,32 @@ public class PetClient {
                 try {
                     String serverMessage;
                     while ((serverMessage = in.readLine()) != null) {
-                        System.out.println("Servidor: " + serverMessage);
+                        System.out.printf((i18n.SERVER_TITLE) + "%n", serverMessage);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.err.printf((i18n.ERROR_COMMUNICATE_SERVER) + "%n", e.getMessage());
                 }
             }).start();
 
+            // Solicitar o nome do cliente
+            System.out.println(i18n.REQUEST_CLIENT_NAME);
+            String clientName = userInput.readLine();
+            out.println(clientName);
+
             // Solicitar o nome do Tamagotchi ao usuário
-            System.out.println("Digite o nome do seu Tamagotchi:");
+            System.out.println(i18n.REQUEST_TAMAGOTCHI_NAME);
             String nomeTamagotchi = userInput.readLine();
             out.println(nomeTamagotchi);
 
             // Menu de comandos disponíveis
-            System.out.println("Comandos disponíveis:");
-            System.out.println("selecionado <índice> - Seleciona um Tamagotchi pelo índice");
-            System.out.println("alimentar - Alimenta o Tamagotchi selecionado");
-            System.out.println("brincar - Brinca com o Tamagotchi selecionado");
-            System.out.println("energia - Verifica a energia do Tamagotchi selecionado");
-            System.out.println("verificar - Verifica o status do Tamagotchi selecionado");
+            System.out.println(i18n.getAvailableCommands());
 
             String userMessage;
             while ((userMessage = userInput.readLine()) != null) {
                 out.println(userMessage);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.printf((i18n.ERROR_CONNECT_SERVER) + "%n", e.getMessage());
         }
     }
 }
